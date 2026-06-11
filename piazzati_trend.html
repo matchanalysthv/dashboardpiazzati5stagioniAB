@@ -20,7 +20,7 @@
   header{border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:8px;}
   .eyebrow{font-size:12px; letter-spacing:2.5px; text-transform:uppercase; color:var(--lat); font-weight:700;}
   h1{font-size:36px; margin:10px 0 4px; font-weight:800; letter-spacing:-0.6px;}
-  .sub{font-size:15px; color:var(--muted); max-width:760px; line-height:1.5;}
+  header .sub{font-size:15px; color:var(--muted); max-width:760px; line-height:1.5;}
   .tabs{display:flex; gap:6px; margin:24px 0 6px; flex-wrap:wrap;}
   .tab{border:1px solid var(--line); background:var(--card); border-radius:8px;
     padding:8px 18px; font-size:13.5px; cursor:pointer; color:var(--muted); font-weight:600;}
@@ -33,12 +33,12 @@
   .col{flex:1; min-width:480px;}
   .col-h{font-size:19px; font-weight:800; margin:0 0 16px; letter-spacing:0.3px;}
   .col-h.A{color:var(--A);} .col-h.B{color:var(--B);}
-  .row{display:grid; grid-template-columns:16px minmax(170px,auto) 1fr auto; align-items:center; gap:22px; padding:16px 0; border-bottom:1px solid var(--line);}
-  .row.sub .rname-wrap{padding-left:24px;}
+  .row{display:grid; grid-template-columns:16px 250px 1fr 200px; align-items:center; gap:22px; padding:16px 0; border-bottom:1px solid var(--line);}
+  .row.sub .rname{padding-left:22px; white-space:nowrap;}
   .dot{width:13px; height:13px; border-radius:50%; flex:none; align-self:center;}
-  .row.sub .dot{margin-left:24px;}
+  .row.sub .dot{opacity:0.6;}
   .rname-wrap{min-width:0; align-self:center;}
-  .rname{font-size:21px; font-weight:700; display:block; line-height:1.15;}
+  .rname{font-size:21px; font-weight:700; display:block; line-height:1.15; white-space:nowrap;}
   .row.sub .rname{font-size:18px; color:var(--muted); font-weight:600;}
   .rtrend{display:flex; align-items:center; gap:10px; margin-top:6px;}
   .slope{font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap;}
@@ -178,10 +178,21 @@ let tbStag='2025-26', tbCamp='A', tbTipo='ang', tbMode='stag';
 
 function verd(r2){ if(r2>=0.60)return['TREND','var(--trend)','#3fae8e22'];
   if(r2>=0.35)return['da segnalare*','var(--segn)','#f2c20022']; return['stabile','var(--stab)','#8a94a322']; }
-function spark(vals,col){
+const SPARK_STAGS=['2021-22','2022-23','2023-24','2024-25','2025-26'];
+function spark(vals,col,unit){
+  unit=unit||'';
   const mn=Math.min(...vals),mx=Math.max(...vals),rng=(mx-mn)||1,W=300,H=60;
-  const pts=vals.map((v,i)=>`${(i/(vals.length-1)*W).toFixed(1)},${(H-(v-mn)/rng*(H-16)-8).toFixed(1)}`).join(' ');
-  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+  const xy=vals.map((v,i)=>[ (i/(vals.length-1)*W), (H-(v-mn)/rng*(H-16)-8) ]);
+  const pts=xy.map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  // punti hover: rettangolo invisibile a tutta altezza (area ampia) + pallino visibile, ciascuno con <title>
+  let dots='';
+  xy.forEach((p,i)=>{
+    const st=SPARK_STAGS[i]||('Anno '+(i+1));
+    const val=vals[i].toFixed(1).replace('.',',')+unit;
+    const half=W/(vals.length-1)/2;
+    dots+=`<rect class="sparkhit" x="${(p[0]-half).toFixed(1)}" y="0" width="${(half*2).toFixed(1)}" height="${H}" fill="transparent" data-st="${st}" data-val="${val}" style="cursor:crosshair"></rect>`;
+  });
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round" style="pointer-events:none"/>${dots}</svg>`;
 }
 function rowHTML(tk,camp){
   const meta=META[tk], d=M[view].data[tk][camp], vb=verd(d.r2), sub=(tk==='latcross');
@@ -199,7 +210,7 @@ function rowHTML(tk,camp){
       <div class="rtrend"><span class="slope">${d.b>0?'+':''}${d.b.toFixed(2)}/anno</span>
         <span class="badge" style="color:${vb[1]};background:${vb[2]}">${vb[0]}</span></div>
     </div>
-    <div class="sparkcell">${spark(d.vals,meta.c)}</div>
+    <div class="sparkcell">${spark(d.vals,meta.c,unit)}</div>
     <span class="vbox">${valHTML}</span>
   </div>`;
 }
@@ -370,6 +381,23 @@ const tabs=[['qty','Quantità'],['cnv','Conversione'],['inc','Incidenza'],['tb',
 document.getElementById('tabs').innerHTML=tabs.map(t=>`<button class="tab" data-v="${t[0]}">${t[1]}</button>`).join('');
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{view=t.dataset.v;render();}));
 if(_isSolo){ document.getElementById('tabs').style.display='none'; }
+// tooltip custom per le sparkline
+(function(){
+  const tip=document.createElement('div');
+  tip.id='sparktip';
+  tip.style.cssText='position:fixed;z-index:9999;pointer-events:none;background:#0b1622;color:#f4f6f8;border:1px solid #f2c200;border-radius:7px;padding:6px 11px;font-size:13px;font-weight:600;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.4);display:none;white-space:nowrap;';
+  document.body.appendChild(tip);
+  document.addEventListener('mouseover',e=>{
+    const r=e.target.closest('.sparkhit');
+    if(r){ tip.innerHTML=`<span style="color:#f2c200">${r.dataset.st}</span> · ${r.dataset.val}`; tip.style.display='block'; }
+  });
+  document.addEventListener('mousemove',e=>{
+    if(tip.style.display==='block'){ tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-14)+'px'; }
+  });
+  document.addEventListener('mouseout',e=>{
+    if(e.target.closest('.sparkhit')) tip.style.display='none';
+  });
+})();
 render();
 </script>
 </body>

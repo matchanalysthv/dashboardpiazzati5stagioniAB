@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calci piazzati — Quantità, Incidenza, Conversione · Serie A vs B</title>
+<style>
+  :root{
+    --ink:#11161d; --muted:#5b6470; --faint:#9aa3ad; --line:#e4e7ec;
+    --bg:#fbfaf7; --card:#ffffff;
+    --A:#1d5fa5; --B:#bd7a1e;
+    --ang:#1d5fa5; --rig:#9a3556; --pun:#0f6e56; --lat:#bd7a1e; --latc:#d99a2b; --altre:#6b7079;
+    --trend:#0f6e56; --segn:#bd7a1e; --stab:#6b7079;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Helvetica Neue",Arial,sans-serif; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1040px; margin:0 auto; padding:40px 24px 64px;}
+  header{border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:8px;}
+  .eyebrow{font-size:12px; letter-spacing:2.5px; text-transform:uppercase; color:var(--lat); font-weight:700;}
+  h1{font-size:30px; margin:8px 0 4px; font-weight:800; letter-spacing:-0.5px;}
+  .sub{font-size:14px; color:var(--muted); max-width:640px; line-height:1.5;}
+  .tabs{display:flex; gap:6px; margin:24px 0 6px; flex-wrap:wrap;}
+  .tab{border:1px solid var(--line); background:var(--card); border-radius:8px;
+    padding:8px 18px; font-size:13.5px; cursor:pointer; color:var(--muted); font-weight:600;}
+  .tab.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .legend{font-size:11.5px; color:var(--faint); margin:0 0 22px;}
+  .legend b{color:var(--muted);}
+  .intro{font-size:14px; color:var(--muted); line-height:1.55; margin:0 0 22px; max-width:760px;}
+  .intro b{color:var(--ink);}
+  .cols{display:flex; gap:40px; flex-wrap:wrap;}
+  .col{flex:1; min-width:320px;}
+  .col-h{font-size:15px; font-weight:800; margin:0 0 8px; letter-spacing:0.3px;}
+  .col-h.A{color:var(--A);} .col-h.B{color:var(--B);}
+  .row{display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--line);}
+  .row.sub{padding-left:18px;}
+  .dot{width:9px; height:9px; border-radius:50%; flex:none;}
+  .rmain{flex:1; min-width:0;}
+  .rtop{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+  .rname{font-size:13.5px; font-weight:600;}
+  .row.sub .rname{font-size:12.5px; color:var(--muted); font-weight:500;}
+  .rval{font-size:19px; font-weight:800; letter-spacing:-0.3px;}
+  .vbox{display:flex; align-items:baseline; gap:14px;}
+  .vstag{font-size:19px; font-weight:800; letter-spacing:-0.3px; color:var(--ink);}
+  .vunit{font-size:10.5px; font-weight:600; color:var(--faint); letter-spacing:0;}
+  .rbot{display:flex; align-items:center; gap:11px; margin-top:5px;}
+  .slope{font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .badge{font-size:10px; font-weight:700; padding:2px 9px; border-radius:11px; white-space:nowrap; letter-spacing:0.2px;}
+  .note{margin-top:20px; padding:14px 16px; background:#fff; border:1px solid var(--line);
+    border-left:3px solid var(--lat); border-radius:8px; font-size:12.5px; color:var(--muted); line-height:1.6;}
+  .note b{color:var(--ink);}
+  footer{margin-top:40px; font-size:11px; color:var(--faint); border-top:1px solid var(--line); padding-top:14px;}
+  svg.spark{overflow:visible; flex:none;}
+  .tbctrl{display:flex; flex-direction:column; gap:10px; margin-bottom:22px;}
+  .tbseg{display:flex; gap:6px; flex-wrap:wrap;}
+  .tbb{border:1px solid var(--line); background:var(--card); border-radius:7px; padding:6px 13px; font-size:12.5px; cursor:pointer; color:var(--muted); font-weight:600;}
+  .tbb.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .tbgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px;}
+  .tbcard{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 18px; box-shadow:0 1px 3px rgba(17,22,29,.05);}
+  .tbtitle{font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); margin-bottom:12px;}
+  .tbrow{display:grid; grid-template-columns:22px 1fr auto; grid-template-areas:"rank sq val" "rank sub sub"; align-items:center; padding:9px 0; border-bottom:1px solid var(--line); column-gap:8px;}
+  .tbrow:last-child{border-bottom:none;}
+  .tbrank{grid-area:rank; font-size:13px; font-weight:700; color:var(--faint);}
+  .tbsq{grid-area:sq; font-size:14.5px; font-weight:600;}
+  .tbval{grid-area:val; font-size:21px; font-weight:800; letter-spacing:-0.3px;}
+  .tbsub{grid-area:sub; font-size:11px; color:var(--faint); margin-top:1px;}
+  .tbtag{font-size:10.5px; font-weight:600; color:var(--faint); background:#f0ece4; padding:1px 7px; border-radius:9px; margin-left:6px; white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Calci piazzati · 5 stagioni · 2021-22 → 2025-26</div>
+    <h1>Quantità, incidenza e conversione</h1>
+    <div class="sub">Dentro il contenitore dei gol da palla inattiva: quanto pesa ogni tipologia, quante se ne battono, quanto rendono — e come si muovono nel tempo tra Serie A e Serie B.</div>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="legend">Verdetto trend: <b style="color:var(--trend)">TREND</b> R²≥0,60 (reale) · <b style="color:var(--segn)">da segnalare*</b> R² 0,35–0,59 (da verificare) · <b style="color:var(--stab)">stabile</b> sotto 0,35.</div>
+  <div class="intro" id="intro"></div>
+  <div class="cols" id="cols"></div>
+  <div id="tbwrap"></div>
+  <div id="notebox"></div>
+
+  <footer>Fonte: dataset Panini/DigitalSoccer · medie-gara per squadra, somme per lega-stagione · trend su regressione lineare 5 punti (R²). La voce «Altre situazioni» raggruppa gli sviluppi da piazzato non attribuiti a un'origine specifica.</footer>
+</div>
+
+<script>
+const M={
+ inc:{ unit:'%', dec:1, title:"Incidenza dentro i gol da piazzato",
+  note:'Quanto pesa ogni tipologia <b>dentro</b> i gol da palla inattiva, media 5 stagioni. Angolo e rigore insieme valgono circa il 60%.',
+  box:'<b>Lettura:</b> l\'angolo è la prima fonte (~33%) e cresce in entrambi i campionati, ma resta sotto soglia trend — da segnalare. Il rigore è la seconda voce e in Serie B cala in modo reale (R²=0,69). «Altre» pesa quanto la punizione: una fetta dei gol da fermo nasce da sviluppi non programmabili.',
+  data:{
+   ang:{A:{vals:[28.1,35.3,31.7,32.6,35.8],m:32.7,b:1.26,r2:0.42}, B:{vals:[32.0,27.1,34.5,34.2,36.8],m:32.9,b:1.68,r2:0.52}},
+   rig:{A:{vals:[29.7,26.6,29.4,25.3,24.8],m:27.2,b:-1.12,r2:0.59}, B:{vals:[26.1,25.6,24.2,19.0,21.6],m:23.3,b:-1.57,r2:0.69}},
+   pun:{A:{vals:[18.6,12.5,15.3,14.6,15.9],m:15.4,b:-0.34,r2:0.06}, B:{vals:[17.9,17.5,18.5,18.2,14.0],m:17.2,b:-0.71,r2:0.36}},
+   lat:{A:{vals:[8.9,7.2,10.4,9.8,8.3],m:8.9,b:0.13,r2:0.03}, B:{vals:[9.6,13.4,10.5,10.3,8.9],m:10.5,b:-0.45,r2:0.17}},
+   altre:{A:{vals:[14.6,18.4,13.3,17.7,15.3],m:15.9,b:0.07,r2:0.00}, B:{vals:[14.4,16.5,12.2,18.2,18.8],m:16.0,b:1.05,r2:0.38}}
+  }, order:['ang','rig','pun','lat','altre']},
+ qty:{ unit:'', dec:1, title:"Battute medie a partita (per squadra)",
+  note:'Quante palle inattive si battono a partita. <b>Il totale rimesse cala, ma i cross da rimessa crescono</b>: la rimessa-arma sta sostituendo la rimessa di possesso. Rigori in calo: se ne fischiano meno.',
+  box:'<b>Attenzione al dato aggregato:</b> la rimessa totale scende (è il possesso che cala), ma la quota di <b>cross da rimessa è passata dall\'8% al 17%</b> in 5 anni in entrambi i campionati. La rimessa si sta professionalizzando come arma offensiva, non sparendo. È il movimento opposto nascosto dentro il totale.',
+  data:{
+   ang:{A:{vals:[4.8,4.7,4.8,4.7,4.3],m:4.6,b:-0.10,r2:0.53}, B:{vals:[5.0,4.9,4.8,4.5,4.8],m:4.8,b:-0.09,r2:0.60}},
+   pun:{A:{vals:[3.0,2.7,2.8,2.7,2.7],m:2.8,b:-0.06,r2:0.66}, B:{vals:[3.3,3.1,3.1,3.2,2.9],m:3.1,b:-0.07,r2:0.59}},
+   lat:{A:{vals:[6.9,7.5,6.9,6.6,6.5],m:6.9,b:-0.16,r2:0.45}, B:{vals:[8.7,8.7,7.8,7.3,7.3],m:8.0,b:-0.43,r2:0.88}},
+   latcross:{A:{vals:[0.6,0.6,0.6,0.7,1.1],m:0.7,b:0.12,r2:0.72}, B:{vals:[0.7,1.0,0.7,1.1,1.4],m:1.0,b:0.13,r2:0.57}},
+   rig:{A:{vals:[0.2,0.2,0.2,0.1,0.1],m:0.2,b:-0.01,r2:0.78}, B:{vals:[0.2,0.2,0.2,0.1,0.1],m:0.2,b:-0.01,r2:0.45}}
+  }, order:['ang','pun','lat','latcross','rig']},
+ cnv:{ unit:'%', dec:1, title:"Conversione: gol ogni 100 battute",
+  note:'Quanti gol ogni 100 battute. <b>Il rigore converte ~77%: come 25 angoli.</b> Questo spiega perché il rigore pesa tanto pur essendo rarissimo. L\'angolo in Serie B sta migliorando (R²=0,70).',
+  box:'<b>Lettura:</b> la distanza tra rigore (~77%) e tutto il resto (angolo ~3%, punizione ~2,5%, rimessa &lt;1%) è enorme. Sull\'angolo non basta batterlo: serve lo schema che porti al tiro. In Serie B l\'angolo converte sempre meglio — gli schemi stanno funzionando.',
+  data:{
+   rig:{A:{vals:[77.5,78.7,77.9,76.2,76.4],m:77.3,b:-0.46,r2:0.49}, B:{vals:[75.4,77.1,80.2,76.9,79.4],m:77.8,b:0.79,r2:0.41}},
+   ang:{A:{vals:[2.9,3.2,3.0,2.9,3.5],m:3.1,b:0.10,r2:0.37}, B:{vals:[3.1,2.9,3.8,3.7,4.0],m:3.5,b:0.25,r2:0.70}},
+   pun:{A:{vals:[3.1,1.9,2.5,2.3,2.5],m:2.5,b:-0.08,r2:0.10}, B:{vals:[2.7,2.9,3.2,2.8,2.5],m:2.8,b:-0.05,r2:0.12}},
+   lat:{A:{vals:[0.6,0.4,0.7,0.6,0.5],m:0.6,b:0.00,r2:0.00}, B:{vals:[0.5,0.8,0.7,0.7,0.6],m:0.7,b:0.01,r2:0.01}}
+  }, order:['rig','ang','pun','lat']}
+};
+const META={
+  ang:{l:'Angolo',c:'var(--ang)'}, rig:{l:'Rigore',c:'var(--rig)'},
+  pun:{l:'Punizione',c:'var(--pun)'}, lat:{l:'Rimessa (totale)',c:'var(--lat)'},
+  latcross:{l:'↳ di cui cross da rimessa',c:'var(--latc)'}, altre:{l:'Altre situazioni',c:'var(--altre)'}
+};
+const TB={"A":{"2021-22":{"ang":{"top":[{"sq":"Inter","v":252},{"sq":"Roma","v":237},{"sq":"Atalanta","v":228}],"bot":[{"sq":"Cagliari","v":144},{"sq":"Sampdoria","v":142},{"sq":"Venezia","v":123}],"bestc":[{"sq":"Roma","c":4.6,"g":11,"v":237},{"sq":"Bologna","c":4.4,"g":8,"v":180},{"sq":"Inter","c":4.4,"g":11,"v":252}]},"pun":{"top":[{"sq":"Milan","v":146},{"sq":"Fiorentina","v":134},{"sq":"Salernitana","v":132}],"bot":[{"sq":"Venezia","v":94},{"sq":"Hellas Verona","v":93},{"sq":"Sassuolo","v":78}],"bestc":[{"sq":"Lazio","c":6.3,"g":7,"v":111},{"sq":"Sampdoria","c":5.8,"g":6,"v":104},{"sq":"Udinese","c":5.7,"g":7,"v":122}]},"lat":{"top":[{"sq":"Empoli","v":348},{"sq":"Atalanta","v":326},{"sq":"Cagliari","v":304}],"bot":[{"sq":"Lazio","v":221},{"sq":"Juventus","v":211},{"sq":"Sassuolo","v":188}],"bestc":[{"sq":"Udinese","c":1.7,"g":4,"v":234},{"sq":"Bologna","c":1.6,"g":4,"v":253},{"sq":"Napoli","c":1.2,"g":3,"v":257}]},"latc":{"top":[{"sq":"Salernitana","v":75},{"sq":"Udinese","v":52},{"sq":"Cagliari","v":51}],"bot":[{"sq":"Lazio","v":4},{"sq":"Fiorentina","v":3},{"sq":"Atalanta","v":3}],"bestc":[{"sq":"Bologna","c":44.4,"g":4,"v":9},{"sq":"Sassuolo","c":40.0,"g":2,"v":5},{"sq":"Hellas Verona","c":14.3,"g":1,"v":7}]},"rig":{"top":[{"sq":"Napoli","v":14},{"sq":"Fiorentina","v":12},{"sq":"Inter","v":11}],"bot":[{"sq":"Udinese","v":4},{"sq":"Sampdoria","v":4},{"sq":"Cagliari","v":4}],"bestc":[{"sq":"Sassuolo","c":100.0,"g":7,"v":7},{"sq":"Torino","c":100.0,"g":6,"v":6},{"sq":"Empoli","c":100.0,"g":7,"v":7}]}},"2022-23":{"ang":{"top":[{"sq":"Fiorentina","v":233},{"sq":"Napoli","v":225},{"sq":"Inter","v":213}],"bot":[{"sq":"Bologna","v":144},{"sq":"Salernitana","v":144},{"sq":"Sampdoria","v":130}],"bestc":[{"sq":"Bologna","c":6.9,"g":10,"v":144},{"sq":"Napoli","c":6.7,"g":15,"v":225},{"sq":"Juventus","c":4.8,"g":10,"v":207}]},"pun":{"top":[{"sq":"Napoli","v":138},{"sq":"Fiorentina","v":133},{"sq":"Sampdoria","v":122}],"bot":[{"sq":"Spezia","v":86},{"sq":"Cremonese","v":85},{"sq":"Hellas Verona","v":77}],"bestc":[{"sq":"Juventus","c":6.3,"g":6,"v":95},{"sq":"Roma","c":3.4,"g":4,"v":118},{"sq":"Udinese","c":3.4,"g":4,"v":119}]},"lat":{"top":[{"sq":"Atalanta","v":393},{"sq":"Spezia","v":379},{"sq":"Fiorentina","v":329}],"bot":[{"sq":"Udinese","v":238},{"sq":"Lazio","v":225},{"sq":"Monza","v":215}],"bestc":[{"sq":"Cremonese","c":1.3,"g":4,"v":298},{"sq":"Udinese","c":1.3,"g":3,"v":238},{"sq":"Roma","c":1.2,"g":3,"v":259}]},"latc":{"top":[{"sq":"Hellas Verona","v":77},{"sq":"Cremonese","v":73},{"sq":"Sampdoria","v":51}],"bot":[{"sq":"Bologna","v":4},{"sq":"Napoli","v":2},{"sq":"Sassuolo","v":2}],"bestc":[{"sq":"Atalanta","c":33.3,"g":2,"v":6},{"sq":"Empoli","c":20.0,"g":1,"v":5},{"sq":"Roma","c":17.6,"g":3,"v":17}]},"rig":{"top":[{"sq":"Napoli","v":10},{"sq":"Roma","v":10},{"sq":"Sassuolo","v":10}],"bot":[{"sq":"Salernitana","v":2},{"sq":"Sampdoria","v":2},{"sq":"Hellas Verona","v":1}],"bestc":[{"sq":"Milan","c":100.0,"g":5,"v":5},{"sq":"Bologna","c":100.0,"g":6,"v":6},{"sq":"Spezia","c":100.0,"g":4,"v":4}]}},"2023-24":{"ang":{"top":[{"sq":"Napoli","v":238},{"sq":"Inter","v":224},{"sq":"Frosinone","v":211}],"bot":[{"sq":"Salernitana","v":147},{"sq":"Hellas Verona","v":142},{"sq":"Genoa","v":141}],"bestc":[{"sq":"Milan","c":6.4,"g":12,"v":188},{"sq":"Juventus","c":6.2,"g":12,"v":194},{"sq":"Roma","c":4.7,"g":8,"v":169}]},"pun":{"top":[{"sq":"Fiorentina","v":129},{"sq":"Milan","v":117},{"sq":"Napoli","v":115}],"bot":[{"sq":"Frosinone","v":90},{"sq":"Salernitana","v":89},{"sq":"Monza","v":84}],"bestc":[{"sq":"Juventus","c":5.1,"g":5,"v":98},{"sq":"Roma","c":5.0,"g":5,"v":101},{"sq":"Napoli","c":3.5,"g":4,"v":115}]},"lat":{"top":[{"sq":"Cagliari","v":316},{"sq":"Napoli","v":309},{"sq":"Frosinone","v":305}],"bot":[{"sq":"Roma","v":229},{"sq":"Milan","v":207},{"sq":"Monza","v":194}],"bestc":[{"sq":"Fiorentina","c":1.3,"g":4,"v":301},{"sq":"Monza","c":1.0,"g":2,"v":194},{"sq":"Atalanta","c":1.0,"g":3,"v":296}]},"latc":{"top":[{"sq":"Inter","v":56},{"sq":"Fiorentina","v":51},{"sq":"Salernitana","v":44}],"bot":[{"sq":"Lazio","v":5},{"sq":"Bologna","v":4},{"sq":"Napoli","v":4}],"bestc":[{"sq":"Lazio","c":40.0,"g":2,"v":5},{"sq":"Atalanta","c":23.1,"g":3,"v":13},{"sq":"Cagliari","c":23.1,"g":3,"v":13}]},"rig":{"top":[{"sq":"Inter","v":14},{"sq":"Roma","v":12},{"sq":"Napoli","v":10}],"bot":[{"sq":"Udinese","v":4},{"sq":"Torino","v":2},{"sq":"Salernitana","v":2}],"bestc":[{"sq":"Atalanta","c":100.0,"g":5,"v":5},{"sq":"Lazio","c":100.0,"g":4,"v":4},{"sq":"Empoli","c":100.0,"g":5,"v":5}]}},"2024-25":{"ang":{"top":[{"sq":"Lazio","v":231},{"sq":"Inter","v":221},{"sq":"Milan","v":215}],"bot":[{"sq":"Fiorentina","v":149},{"sq":"Venezia","v":142},{"sq":"Monza","v":137}],"bestc":[{"sq":"Inter","c":5.0,"g":11,"v":221},{"sq":"Roma","c":4.8,"g":8,"v":167},{"sq":"Fiorentina","c":4.7,"g":7,"v":149}]},"pun":{"top":[{"sq":"Bologna","v":149},{"sq":"Genoa","v":123},{"sq":"Roma","v":122}],"bot":[{"sq":"Torino","v":81},{"sq":"Hellas Verona","v":81},{"sq":"Juventus","v":79}],"bestc":[{"sq":"Venezia","c":4.3,"g":5,"v":116},{"sq":"Torino","c":3.7,"g":3,"v":81},{"sq":"Lazio","c":3.6,"g":4,"v":110}]},"lat":{"top":[{"sq":"Bologna","v":315},{"sq":"Empoli","v":309},{"sq":"Genoa","v":275}],"bot":[{"sq":"Monza","v":207},{"sq":"Fiorentina","v":203},{"sq":"Milan","v":168}],"bestc":[{"sq":"Bologna","c":1.3,"g":4,"v":315},{"sq":"Hellas Verona","c":1.2,"g":3,"v":254},{"sq":"Lecce","c":1.1,"g":3,"v":267}]},"latc":{"top":[{"sq":"Inter","v":67},{"sq":"Genoa","v":67},{"sq":"Lecce","v":65}],"bot":[{"sq":"Empoli","v":9},{"sq":"Lazio","v":5},{"sq":"Milan","v":0}],"bestc":[{"sq":"Empoli","c":33.3,"g":3,"v":9},{"sq":"Fiorentina","c":22.2,"g":2,"v":9},{"sq":"Bologna","c":16.0,"g":4,"v":25}]},"rig":{"top":[{"sq":"Inter","v":9},{"sq":"Roma","v":9},{"sq":"Fiorentina","v":8}],"bot":[{"sq":"Como","v":2},{"sq":"Genoa","v":2},{"sq":"Hellas Verona","v":2}],"bestc":[{"sq":"Juventus","c":100.0,"g":6,"v":6},{"sq":"Cagliari","c":100.0,"g":3,"v":3},{"sq":"Monza","c":100.0,"g":3,"v":3}]}},"2025-26":{"ang":{"top":[{"sq":"Inter","v":240},{"sq":"Atalanta","v":215},{"sq":"Napoli","v":208}],"bot":[{"sq":"Genoa","v":140},{"sq":"Cremonese","v":136},{"sq":"Pisa","v":134}],"bestc":[{"sq":"Inter","c":6.7,"g":16,"v":240},{"sq":"Sassuolo","c":5.6,"g":8,"v":143},{"sq":"Roma","c":5.6,"g":11,"v":197}]},"pun":{"top":[{"sq":"Genoa","v":141},{"sq":"Roma","v":134},{"sq":"Milan","v":130}],"bot":[{"sq":"Atalanta","v":77},{"sq":"Torino","v":75},{"sq":"Hellas Verona","v":64}],"bestc":[{"sq":"Juventus","c":5.2,"g":6,"v":116},{"sq":"Bologna","c":4.9,"g":5,"v":102},{"sq":"Napoli","c":4.4,"g":4,"v":90}]},"lat":{"top":[{"sq":"Lecce","v":326},{"sq":"Inter","v":297},{"sq":"Roma","v":287}],"bot":[{"sq":"Sassuolo","v":217},{"sq":"Milan","v":216},{"sq":"Cagliari","v":216}],"bestc":[{"sq":"Milan","c":1.4,"g":3,"v":216},{"sq":"Pisa","c":1.3,"g":3,"v":231},{"sq":"Udinese","c":1.3,"g":3,"v":232}]},"latc":{"top":[{"sq":"Pisa","v":106},{"sq":"Hellas Verona","v":96},{"sq":"Parma","v":91}],"bot":[{"sq":"Milan","v":9},{"sq":"Napoli","v":7},{"sq":"Lazio","v":3}],"bestc":[{"sq":"Milan","c":33.3,"g":3,"v":9},{"sq":"Napoli","c":28.6,"g":2,"v":7},{"sq":"Inter","c":5.7,"g":3,"v":53}]},"rig":{"top":[{"sq":"Milan","v":9},{"sq":"Genoa","v":9},{"sq":"Como","v":8}],"bot":[{"sq":"Parma","v":2},{"sq":"Cagliari","v":2},{"sq":"Lecce","v":2}],"bestc":[{"sq":"Atalanta","c":100.0,"g":3,"v":3},{"sq":"Udinese","c":100.0,"g":5,"v":5},{"sq":"Fiorentina","c":100.0,"g":6,"v":6}]}}},"B":{"2021-22":{"ang":{"top":[{"sq":"Brescia","v":244},{"sq":"Frosinone","v":234},{"sq":"Monza","v":220}],"bot":[{"sq":"Ascoli","v":156},{"sq":"Como","v":144},{"sq":"Reggina","v":142}],"bestc":[{"sq":"Ascoli","c":5.8,"g":9,"v":156},{"sq":"Alessandria","c":4.5,"g":9,"v":199},{"sq":"Como","c":4.2,"g":6,"v":144}]},"pun":{"top":[{"sq":"Cremonese","v":159},{"sq":"Pordenone","v":144},{"sq":"Perugia","v":141}],"bot":[{"sq":"Frosinone","v":106},{"sq":"Brescia","v":91},{"sq":"Como","v":91}],"bestc":[{"sq":"Crotone","c":4.7,"g":5,"v":107},{"sq":"Parma","c":4.3,"g":6,"v":141},{"sq":"Spal","c":4.1,"g":5,"v":121}]},"lat":{"top":[{"sq":"Cittadella","v":406},{"sq":"Brescia","v":382},{"sq":"Frosinone","v":375}],"bot":[{"sq":"Benevento","v":262},{"sq":"Cosenza","v":256},{"sq":"Como","v":232}],"bestc":[{"sq":"Cremonese","c":1.4,"g":5,"v":352},{"sq":"LR Vicenza","c":1.1,"g":4,"v":359},{"sq":"Brescia","c":1.0,"g":4,"v":382}]},"latc":{"top":[{"sq":"Spal","v":70},{"sq":"Brescia","v":60},{"sq":"Cremonese","v":53}],"bot":[{"sq":"Frosinone","v":11},{"sq":"Benevento","v":9},{"sq":"Pordenone","v":8}],"bestc":[{"sq":"Frosinone","c":18.2,"g":2,"v":11},{"sq":"Ternana","c":16.7,"g":3,"v":18},{"sq":"LR Vicenza","c":14.8,"g":4,"v":27}]},"rig":{"top":[{"sq":"Como","v":12},{"sq":"Pisa","v":9},{"sq":"Lecce","v":8}],"bot":[{"sq":"Spal","v":4},{"sq":"Alessandria","v":4},{"sq":"Parma","v":1}],"bestc":[{"sq":"Monza","c":100.0,"g":8,"v":8},{"sq":"Benevento","c":100.0,"g":7,"v":7},{"sq":"Reggina","c":100.0,"g":6,"v":6}]}},"2022-23":{"ang":{"top":[{"sq":"Parma","v":241},{"sq":"Perugia","v":217},{"sq":"Genoa","v":214}],"bot":[{"sq":"Bari","v":159},{"sq":"Pisa","v":159},{"sq":"Sudtirol","v":146}],"bestc":[{"sq":"Sudtirol","c":5.5,"g":8,"v":146},{"sq":"Brescia","c":4.7,"g":8,"v":171},{"sq":"Palermo","c":3.7,"g":7,"v":190}]},"pun":{"top":[{"sq":"Cittadella","v":144},{"sq":"Parma","v":141},{"sq":"Benevento","v":139}],"bot":[{"sq":"Cosenza","v":100},{"sq":"Venezia","v":99},{"sq":"Sudtirol","v":97}],"bestc":[{"sq":"Bari","c":5.0,"g":5,"v":101},{"sq":"Ternana","c":4.3,"g":5,"v":115},{"sq":"Venezia","c":4.0,"g":4,"v":99}]},"lat":{"top":[{"sq":"Cittadella","v":452},{"sq":"Perugia","v":437},{"sq":"Genoa","v":360}],"bot":[{"sq":"Palermo","v":286},{"sq":"Spal","v":259},{"sq":"Bari","v":257}],"bestc":[{"sq":"Como","c":1.7,"g":5,"v":293},{"sq":"Reggina","c":1.5,"g":5,"v":342},{"sq":"Cagliari","c":1.4,"g":5,"v":354}]},"latc":{"top":[{"sq":"Perugia","v":87},{"sq":"Cittadella","v":78},{"sq":"Spal","v":68}],"bot":[{"sq":"Modena","v":7},{"sq":"Frosinone","v":6},{"sq":"Venezia","v":6}],"bestc":[{"sq":"Cagliari","c":50.0,"g":5,"v":10},{"sq":"Frosinone","c":33.3,"g":2,"v":6},{"sq":"Venezia","c":33.3,"g":2,"v":6}]},"rig":{"top":[{"sq":"Bari","v":12},{"sq":"Palermo","v":12},{"sq":"Perugia","v":11}],"bot":[{"sq":"Spal","v":3},{"sq":"Frosinone","v":2},{"sq":"Cosenza","v":2}],"bestc":[{"sq":"Ascoli","c":100.0,"g":6,"v":6},{"sq":"Pisa","c":100.0,"g":9,"v":9},{"sq":"Ternana","c":100.0,"g":4,"v":4}]}},"2023-24":{"ang":{"top":[{"sq":"Cremonese","v":212},{"sq":"Parma","v":209},{"sq":"Bari","v":208}],"bot":[{"sq":"Sampdoria","v":151},{"sq":"Reggiana","v":146},{"sq":"Sudtirol","v":138}],"bestc":[{"sq":"Venezia","c":8.3,"g":16,"v":193},{"sq":"Como","c":7.1,"g":12,"v":168},{"sq":"Pisa","c":6.8,"g":12,"v":176}]},"pun":{"top":[{"sq":"Ascoli","v":152},{"sq":"Spezia","v":146},{"sq":"Sampdoria","v":140}],"bot":[{"sq":"Cremonese","v":98},{"sq":"Venezia","v":94},{"sq":"Como","v":87}],"bestc":[{"sq":"Como","c":8.0,"g":7,"v":87},{"sq":"Palermo","c":7.8,"g":9,"v":116},{"sq":"Cosenza","c":4.6,"g":5,"v":109}]},"lat":{"top":[{"sq":"Cittadella","v":474},{"sq":"Ascoli","v":399},{"sq":"Spezia","v":332}],"bot":[{"sq":"Reggiana","v":252},{"sq":"Sampdoria","v":228},{"sq":"Catanzaro","v":176}],"bestc":[{"sq":"FeralpiSal\u00f2","c":2.0,"g":6,"v":298},{"sq":"Cittadella","c":1.7,"g":8,"v":474},{"sq":"Parma","c":1.2,"g":4,"v":328}]},"latc":{"top":[{"sq":"Cittadella","v":79},{"sq":"Ascoli","v":62},{"sq":"Spezia","v":61}],"bot":[{"sq":"Cremonese","v":6},{"sq":"Catanzaro","v":5},{"sq":"Modena","v":5}],"bestc":[{"sq":"Cremonese","c":33.3,"g":2,"v":6},{"sq":"Parma","c":30.8,"g":4,"v":13},{"sq":"FeralpiSal\u00f2","c":20.7,"g":6,"v":29}]},"rig":{"top":[{"sq":"Sudtirol","v":12},{"sq":"Parma","v":11},{"sq":"Sampdoria","v":8}],"bot":[{"sq":"FeralpiSal\u00f2","v":4},{"sq":"Brescia","v":3},{"sq":"Cittadella","v":3}],"bestc":[{"sq":"Cremonese","c":100.0,"g":5,"v":5},{"sq":"Brescia","c":100.0,"g":3,"v":3},{"sq":"Reggiana","c":100.0,"g":4,"v":4}]}},"2024-25":{"ang":{"top":[{"sq":"Spezia","v":213},{"sq":"Cremonese","v":206},{"sq":"Bari","v":200}],"bot":[{"sq":"Mantova","v":152},{"sq":"Cittadella","v":143},{"sq":"Reggiana","v":141}],"bestc":[{"sq":"Spezia","c":5.6,"g":12,"v":213},{"sq":"Pisa","c":5.6,"g":9,"v":161},{"sq":"Palermo","c":5.1,"g":10,"v":198}]},"pun":{"top":[{"sq":"Spezia","v":167},{"sq":"Catanzaro","v":139},{"sq":"Cosenza","v":135}],"bot":[{"sq":"Frosinone","v":107},{"sq":"Cesena","v":106},{"sq":"Carrarese","v":98}],"bestc":[{"sq":"Modena","c":5.4,"g":6,"v":112},{"sq":"Spezia","c":4.8,"g":8,"v":167},{"sq":"Catanzaro","c":4.3,"g":6,"v":139}]},"lat":{"top":[{"sq":"Cittadella","v":380},{"sq":"Pisa","v":362},{"sq":"Spezia","v":345}],"bot":[{"sq":"Modena","v":216},{"sq":"Frosinone","v":216},{"sq":"Mantova","v":196}],"bestc":[{"sq":"Sassuolo","c":1.6,"g":4,"v":253},{"sq":"Sudtirol","c":1.4,"g":4,"v":296},{"sq":"Cosenza","c":1.3,"g":4,"v":303}]},"latc":{"top":[{"sq":"Pisa","v":149},{"sq":"Spezia","v":116},{"sq":"Sudtirol","v":94}],"bot":[{"sq":"Cremonese","v":8},{"sq":"Frosinone","v":6},{"sq":"Cesena","v":5}],"bestc":[{"sq":"Sassuolo","c":40.0,"g":4,"v":10},{"sq":"Cesena","c":40.0,"g":2,"v":5},{"sq":"Frosinone","c":33.3,"g":2,"v":6}]},"rig":{"top":[{"sq":"Sassuolo","v":8},{"sq":"Spezia","v":8},{"sq":"Cesena","v":7}],"bot":[{"sq":"Reggiana","v":2},{"sq":"Brescia","v":2},{"sq":"Cittadella","v":1}],"bestc":[{"sq":"Sudtirol","c":100.0,"g":6,"v":6},{"sq":"Modena","c":100.0,"g":6,"v":6},{"sq":"Sassuolo","c":87.5,"g":7,"v":8}]}},"2025-26":{"ang":{"top":[{"sq":"Frosinone","v":233},{"sq":"Monza","v":216},{"sq":"Carrarese","v":216}],"bot":[{"sq":"Padova","v":150},{"sq":"Reggiana","v":136},{"sq":"Bari","v":132}],"bestc":[{"sq":"Catanzaro","c":7.5,"g":12,"v":159},{"sq":"Empoli","c":6.5,"g":12,"v":184},{"sq":"Padova","c":6.0,"g":9,"v":150}]},"pun":{"top":[{"sq":"Mantova","v":140},{"sq":"Sudtirol","v":132},{"sq":"Venezia","v":129}],"bot":[{"sq":"Juve Stabia","v":88},{"sq":"Cesena","v":81},{"sq":"Padova","v":75}],"bestc":[{"sq":"Virtus Entella","c":6.6,"g":6,"v":91},{"sq":"Pescara","c":5.5,"g":7,"v":128},{"sq":"Frosinone","c":4.8,"g":6,"v":125}]},"lat":{"top":[{"sq":"Sudtirol","v":444},{"sq":"Palermo","v":318},{"sq":"Frosinone","v":309}],"bot":[{"sq":"Venezia","v":223},{"sq":"Catanzaro","v":223},{"sq":"Bari","v":214}],"bestc":[{"sq":"Palermo","c":1.9,"g":6,"v":318},{"sq":"Frosinone","c":1.3,"g":4,"v":309},{"sq":"Mantova","c":1.3,"g":3,"v":237}]},"latc":{"top":[{"sq":"Sudtirol","v":181},{"sq":"Palermo","v":104},{"sq":"Frosinone","v":85}],"bot":[{"sq":"Avellino","v":9},{"sq":"Monza","v":8},{"sq":"Venezia","v":4}],"bestc":[{"sq":"Avellino","c":22.2,"g":2,"v":9},{"sq":"Mantova","c":17.6,"g":3,"v":17},{"sq":"Pescara","c":12.5,"g":2,"v":16}]},"rig":{"top":[{"sq":"Venezia","v":13},{"sq":"Modena","v":9},{"sq":"Mantova","v":8}],"bot":[{"sq":"Pescara","v":3},{"sq":"Avellino","v":2},{"sq":"Reggiana","v":2}],"bestc":[{"sq":"Frosinone","c":100.0,"g":6,"v":6},{"sq":"Monza","c":100.0,"g":3,"v":3},{"sq":"Palermo","c":100.0,"g":7,"v":7}]}}}};
+const TBALL={"ang":{"top":[{"sq":"Inter","st":"2021-22","c":"A","v":252,"g":11},{"sq":"Brescia","st":"2021-22","c":"B","v":244,"g":10},{"sq":"Parma","st":"2022-23","c":"B","v":241,"g":4},{"sq":"Inter","st":"2025-26","c":"A","v":240,"g":16},{"sq":"Napoli","st":"2023-24","c":"A","v":238,"g":4}],"bot":[{"sq":"Reggiana","st":"2025-26","c":"B","v":136,"g":5},{"sq":"Pisa","st":"2025-26","c":"A","v":134,"g":4},{"sq":"Bari","st":"2025-26","c":"B","v":132,"g":4},{"sq":"Sampdoria","st":"2022-23","c":"A","v":130,"g":2},{"sq":"Venezia","st":"2021-22","c":"A","v":123,"g":2}],"bestc":[{"sq":"Venezia","st":"2023-24","c":"B","cv":8.3,"g":16,"v":193},{"sq":"Catanzaro","st":"2025-26","c":"B","cv":7.5,"g":12,"v":159},{"sq":"Como","st":"2023-24","c":"B","cv":7.1,"g":12,"v":168},{"sq":"Bologna","st":"2022-23","c":"A","cv":6.9,"g":10,"v":144},{"sq":"Pisa","st":"2023-24","c":"B","cv":6.8,"g":12,"v":176}]},"pun":{"top":[{"sq":"Spezia","st":"2024-25","c":"B","v":167,"g":8},{"sq":"Cremonese","st":"2021-22","c":"B","v":159,"g":5},{"sq":"Ascoli","st":"2023-24","c":"B","v":152,"g":6},{"sq":"Bologna","st":"2024-25","c":"A","v":149,"g":4},{"sq":"Milan","st":"2021-22","c":"A","v":146,"g":6}],"bot":[{"sq":"Hellas Verona","st":"2022-23","c":"A","v":77,"g":1},{"sq":"Atalanta","st":"2025-26","c":"A","v":77,"g":1},{"sq":"Torino","st":"2025-26","c":"A","v":75,"g":1},{"sq":"Padova","st":"2025-26","c":"B","v":75,"g":0},{"sq":"Hellas Verona","st":"2025-26","c":"A","v":64,"g":1}],"bestc":[{"sq":"Como","st":"2023-24","c":"B","cv":8.0,"g":7,"v":87},{"sq":"Palermo","st":"2023-24","c":"B","cv":7.8,"g":9,"v":116},{"sq":"Virtus Entella","st":"2025-26","c":"B","cv":6.6,"g":6,"v":91},{"sq":"Juventus","st":"2022-23","c":"A","cv":6.3,"g":6,"v":95},{"sq":"Lazio","st":"2021-22","c":"A","cv":6.3,"g":7,"v":111}]},"lat":{"top":[{"sq":"Cittadella","st":"2023-24","c":"B","v":474,"g":8},{"sq":"Cittadella","st":"2022-23","c":"B","v":452,"g":1},{"sq":"Sudtirol","st":"2025-26","c":"B","v":444,"g":5},{"sq":"Perugia","st":"2022-23","c":"B","v":437,"g":3},{"sq":"Cittadella","st":"2021-22","c":"B","v":406,"g":2}],"bot":[{"sq":"Mantova","st":"2024-25","c":"B","v":196,"g":2},{"sq":"Monza","st":"2023-24","c":"A","v":194,"g":2},{"sq":"Sassuolo","st":"2021-22","c":"A","v":188,"g":2},{"sq":"Catanzaro","st":"2023-24","c":"B","v":176,"g":1},{"sq":"Milan","st":"2024-25","c":"A","v":168,"g":1}],"bestc":[{"sq":"FeralpiSal\u00f2","st":"2023-24","c":"B","cv":2.0,"g":6,"v":298},{"sq":"Palermo","st":"2025-26","c":"B","cv":1.9,"g":6,"v":318},{"sq":"Udinese","st":"2021-22","c":"A","cv":1.7,"g":4,"v":234},{"sq":"Como","st":"2022-23","c":"B","cv":1.7,"g":5,"v":293},{"sq":"Cittadella","st":"2023-24","c":"B","cv":1.7,"g":8,"v":474}]},"latc":{"top":[{"sq":"Sudtirol","st":"2025-26","c":"B","v":181,"g":5},{"sq":"Pisa","st":"2024-25","c":"B","v":149,"g":3},{"sq":"Spezia","st":"2024-25","c":"B","v":116,"g":2},{"sq":"Pisa","st":"2025-26","c":"A","v":106,"g":3},{"sq":"Palermo","st":"2025-26","c":"B","v":104,"g":6}],"bot":[{"sq":"Fiorentina","st":"2021-22","c":"A","v":3,"g":1},{"sq":"Atalanta","st":"2021-22","c":"A","v":3,"g":3},{"sq":"Lazio","st":"2025-26","c":"A","v":3,"g":1},{"sq":"Napoli","st":"2022-23","c":"A","v":2,"g":1},{"sq":"Sassuolo","st":"2022-23","c":"A","v":2,"g":1}],"bestc":[{"sq":"Cagliari","st":"2022-23","c":"B","cv":50.0,"g":5,"v":10},{"sq":"Bologna","st":"2021-22","c":"A","cv":44.4,"g":4,"v":9},{"sq":"Sassuolo","st":"2024-25","c":"B","cv":40.0,"g":4,"v":10},{"sq":"Sassuolo","st":"2021-22","c":"A","cv":40.0,"g":2,"v":5},{"sq":"Lazio","st":"2023-24","c":"A","cv":40.0,"g":2,"v":5}]},"rig":{"top":[{"sq":"Napoli","st":"2021-22","c":"A","v":14,"g":10},{"sq":"Inter","st":"2023-24","c":"A","v":14,"g":13},{"sq":"Venezia","st":"2025-26","c":"B","v":13,"g":9},{"sq":"Fiorentina","st":"2021-22","c":"A","v":12,"g":9},{"sq":"Roma","st":"2023-24","c":"A","v":12,"g":11}],"bot":[{"sq":"Avellino","st":"2025-26","c":"B","v":2,"g":1},{"sq":"Reggiana","st":"2025-26","c":"B","v":2,"g":2},{"sq":"Hellas Verona","st":"2022-23","c":"A","v":1,"g":1},{"sq":"Parma","st":"2021-22","c":"B","v":1,"g":0},{"sq":"Cittadella","st":"2024-25","c":"B","v":1,"g":1}],"bestc":[{"sq":"Sudtirol","st":"2023-24","c":"B","cv":100.0,"g":12,"v":12},{"sq":"Pisa","st":"2022-23","c":"B","cv":100.0,"g":9,"v":9},{"sq":"Monza","st":"2021-22","c":"B","cv":100.0,"g":8,"v":8},{"sq":"Sassuolo","st":"2021-22","c":"A","cv":100.0,"g":7,"v":7},{"sq":"Empoli","st":"2021-22","c":"A","cv":100.0,"g":7,"v":7}]}};
+let view='qty';
+// --- modalità pannello singolo isolabile via URL: ?solo=qty|cnv|inc|tb ---
+const _params=new URLSearchParams(location.search);
+const _solo=_params.get('solo');
+const _isSolo=['qty','cnv','inc','tb'].includes(_solo);
+if(_isSolo){ view=_solo; }
+let tbStag='2025-26', tbCamp='A', tbTipo='ang', tbMode='stag';
+
+function verd(r2){ if(r2>=0.60)return['TREND','var(--trend)','#0f6e5618'];
+  if(r2>=0.35)return['da segnalare*','var(--segn)','#bd7a1e18']; return['stabile','var(--stab)','#6b707918']; }
+function spark(vals,col){
+  const mn=Math.min(...vals),mx=Math.max(...vals),rng=(mx-mn)||1,W=104,H=26;
+  const pts=vals.map((v,i)=>`${(i/(vals.length-1)*W).toFixed(1)},${(H-(v-mn)/rng*H).toFixed(1)}`).join(' ');
+  const lx=W, ly=(H-(vals[vals.length-1]-mn)/rng*H).toFixed(1);
+  return `<svg class="spark" width="${W}" height="${H}" viewBox="-1 -3 ${W+4} ${H+6}"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2"/><circle cx="${lx}" cy="${ly}" r="3" fill="${col}"/></svg>`;
+}
+function rowHTML(tk,camp){
+  const meta=META[tk], d=M[view].data[tk][camp], vb=verd(d.r2), sub=(tk==='latcross');
+  const unit=M[view].unit, dec=M[view].dec;
+  // nella vista quantità mostro a-partita E a-stagione (×38)
+  let valHTML;
+  if(view==='qty'){
+    const stag=Math.round(d.m*38);
+    valHTML=`<span class="rval" style="color:${meta.c}">${d.m.toFixed(dec).replace('.',',')}<span class="vunit">/gara</span></span>
+             <span class="vstag">${stag} <span class="vunit">/stagione</span></span>`;
+  } else {
+    valHTML=`<span class="rval" style="color:${meta.c}">${d.m.toFixed(dec)}${unit}</span>`;
+  }
+  return `<div class="row ${sub?'sub':''}">
+    <span class="dot" style="background:${meta.c}"></span>
+    <div class="rmain">
+      <div class="rtop"><span class="rname">${meta.l}</span><span class="vbox">${valHTML}</span></div>
+      <div class="rbot">${spark(d.vals,meta.c)}<span class="slope">${d.b>0?'+':''}${d.b.toFixed(2)}/anno</span>
+        <span class="badge" style="color:${vb[1]};background:${vb[2]}">${vb[0]}</span></div>
+    </div></div>`;
+}
+function render(){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.dataset.v===view));
+  if(view==='tb'){ renderTB(); return; }
+  document.getElementById('tbwrap').innerHTML='';
+  document.getElementById('cols').style.display='';
+  document.getElementById('intro').style.display='';
+  document.getElementById('intro').innerHTML='<b>'+M[view].title+'.</b> '+M[view].note;
+  let cols='';
+  ['A','B'].forEach(camp=>{
+    let inner=`<div class="col"><div class="col-h ${camp}">Serie ${camp}</div>`;
+    M[view].order.forEach(tk=>{ if(M[view].data[tk]) inner+=rowHTML(tk,camp); });
+    cols+=inner+'</div>';
+  });
+  document.getElementById('cols').innerHTML=cols;
+  document.getElementById('notebox').innerHTML='<div class="note">'+M[view].box+'</div>';
+}
+const TBMETA={ang:{l:'Angoli',c:'var(--ang)'},pun:{l:'Punizioni',c:'var(--pun)'},lat:{l:'Rimesse (totale)',c:'var(--lat)'},latc:{l:'Cross da rimessa',c:'var(--latc)'},rig:{l:'Rigori',c:'var(--rig)'}};
+const STAGS=['2021-22','2022-23','2023-24','2024-25','2025-26'];
+function renderTB(){
+  document.getElementById('cols').style.display='none';
+  document.getElementById('notebox').innerHTML='';
+  const meta=TBMETA[tbTipo];
+
+  // controlli: modalità, campionato (solo in modalità stagione), stagione (solo stagione), tipologia
+  let ctrl='<div class="tbctrl">';
+  ctrl+='<div class="tbseg" id="seg-mode">'+[['stag','Per stagione'],['all','Di sempre']].map(m=>`<button class="tbb ${tbMode===m[0]?'on':''}" data-mode="${m[0]}">${m[1]}</button>`).join('')+'</div>';
+  if(tbMode==='stag'){
+    ctrl+='<div class="tbseg" id="seg-camp">'+['A','B'].map(c=>`<button class="tbb ${tbCamp===c?'on':''}" data-camp="${c}">Serie ${c}</button>`).join('')+'</div>';
+    ctrl+='<div class="tbseg" id="seg-stag">'+STAGS.map(s=>`<button class="tbb ${tbStag===s?'on':''}" data-stag="${s}">${s}</button>`).join('')+'</div>';
+  }
+  ctrl+='<div class="tbseg" id="seg-tipo">'+Object.keys(TBMETA).map(t=>`<button class="tbb ${tbTipo===t?'on':''}" data-tipo="${t}">${TBMETA[t].l}</button>`).join('')+'</div>';
+  ctrl+='</div>';
+
+  const intro=document.getElementById('intro'); intro.style.display='';
+  let d, tag=(r)=>'';
+  if(tbMode==='stag'){
+    d=TB[tbCamp][tbStag][tbTipo];
+    intro.innerHTML=`<b>Top &amp; Bottom — ${meta.l}, Serie ${tbCamp} ${tbStag}.</b> Dalle medie ai nomi: chi domina e chi è in fondo, e chi converte meglio.`;
+  } else {
+    d=TBALL[tbTipo];
+    intro.innerHTML=`<b>${meta.l} — i record di sempre.</b> Le punte massime su tutte e 5 le stagioni, Serie A e B insieme. I tetti realmente raggiungibili in una stagione.`;
+    tag=(r)=>` <span class="tbtag">${r.st} · ${r.c}</span>`;
+  }
+
+  function card(title,rows,kind){
+    let body=rows.map((r,i)=>{
+      const big = kind==='conv' ? (r.cv!==undefined?r.cv:r.c).toFixed(1).replace('.',',')+'%' : r.v;
+      const sub = kind==='conv' ? `${r.g} gol su ${r.v}` : 'battute';
+      return `<div class="tbrow"><span class="tbrank">${i+1}</span><span class="tbsq">${r.sq}${tag(r)}</span><span class="tbval" style="color:${meta.c}">${big}</span><span class="tbsub">${sub}</span></div>`;
+    }).join('');
+    return `<div class="tbcard"><div class="tbtitle">${title}</div>${body}</div>`;
+  }
+
+  let h=ctrl+'<div class="tbgrid">';
+  h+=card(tbMode==='all'?'Record — ne battono di PIÙ':'Ne battono di PIÙ', d.top, 'vol');
+  h+=card(tbMode==='all'?'I più bassi di sempre':'Ne battono di MENO', d.bot, 'vol');
+  h+=card('Convertono meglio (gol/battute)', d.bestc, 'conv');
+  h+='</div>';
+  const noteTxt = tbMode==='all'
+    ? '<b>Di sempre:</b> ogni riga è una singola stagione di una squadra, su tutte e 5 le annate e i due campionati. A sinistra le punte massime, al centro i minimi, a destra le migliori conversioni.'
+    : '<b>Come leggere:</b> volume = battute nella stagione. Conversione = gol ogni 100 battute (soglia minima per evitare casi anomali). Sui rigori conta più il volume ottenuto che la conversione, quasi sempre alta.';
+  h+='<div class="note" style="margin-top:18px;">'+noteTxt+'</div>';
+  document.getElementById('tbwrap').innerHTML=h;
+
+  const seg=(id,attr,fn)=>document.querySelectorAll('#'+id+' .tbb').forEach(b=>b.onclick=()=>{fn(b.dataset[attr]);renderTB();});
+  seg('seg-mode','mode',v=>tbMode=v);
+  if(tbMode==='stag'){ seg('seg-camp','camp',v=>tbCamp=v); seg('seg-stag','stag',v=>tbStag=v); }
+  seg('seg-tipo','tipo',v=>tbTipo=v);
+}
+const tabs=[['qty','Quantità'],['cnv','Conversione'],['inc','Incidenza'],['tb','Top & Bottom']];
+document.getElementById('tabs').innerHTML=tabs.map(t=>`<button class="tab" data-v="${t[0]}">${t[1]}</button>`).join('');
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{view=t.dataset.v;render();}));
+if(_isSolo){ document.getElementById('tabs').style.display='none'; }
+render();
+</script>
+</body>
+</html>

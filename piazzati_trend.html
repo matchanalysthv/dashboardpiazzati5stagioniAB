@@ -49,6 +49,10 @@
   .rval{font-size:32px; font-weight:800; letter-spacing:-0.4px;}
   .vstag{font-size:32px; font-weight:800; letter-spacing:-0.4px; color:var(--ink);}
   .vunit{font-size:13px; font-weight:600; color:var(--faint); letter-spacing:0;}
+  .vstack{display:flex; flex-direction:column; align-items:flex-end; gap:2px;}
+  .vgol{font-size:13px; font-weight:600; color:var(--faint); letter-spacing:0; white-space:nowrap;}
+  .rnd{font-size:30px; font-weight:800; color:var(--faint); letter-spacing:-0.4px;}
+  .ndnote{font-size:13px; color:var(--faint); font-style:italic;}
   .note{margin-top:30px; padding:22px 28px; background:#1a2733; border:1px solid #2a3744;
     border-left:5px solid var(--amber); border-radius:10px; font-size:17px; color:var(--ink); line-height:1.6;}
   .note b{color:var(--amber); font-weight:700;}
@@ -61,13 +65,13 @@
   .tbgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:22px;}
   .tbcard{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px 22px; box-shadow:0 1px 3px rgba(17,22,29,.05);}
   .tbtitle{font-size:13px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); margin-bottom:14px;}
-  .tbrow{display:grid; grid-template-columns:24px 1fr auto; grid-template-areas:"rank sq val" "rank sub sub"; align-items:center; padding:11px 0; border-bottom:1px solid var(--line); column-gap:10px;}
+  .tbrow{display:grid; grid-template-columns:26px 1fr auto; grid-template-areas:"rank sq val" "rank sub sub"; align-items:center; padding:14px 0; border-bottom:1px solid var(--line); column-gap:12px;}
   .tbrow:last-child{border-bottom:none;}
-  .tbrank{grid-area:rank; font-size:14px; font-weight:700; color:var(--faint);}
-  .tbsq{grid-area:sq; font-size:15.5px; font-weight:600;}
-  .tbval{grid-area:val; font-size:23px; font-weight:800; letter-spacing:-0.3px;}
-  .tbsub{grid-area:sub; font-size:11.5px; color:var(--faint); margin-top:1px;}
-  .tbtag{font-size:11px; font-weight:600; color:var(--faint); background:#202d3a; padding:1px 8px; border-radius:9px; margin-left:6px; white-space:nowrap;}
+  .tbrank{grid-area:rank; font-size:15px; font-weight:700; color:var(--faint);}
+  .tbsq{grid-area:sq; font-size:19px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .tbval{grid-area:val; font-size:24px; font-weight:800; letter-spacing:-0.3px;}
+  .tbsub{grid-area:sub; font-size:12px; color:var(--faint); margin-top:2px;}
+  .tbtag{font-size:11.5px; font-weight:600; color:var(--faint); background:#202d3a; padding:2px 9px; border-radius:9px; margin-left:8px; white-space:nowrap;}
   /* selettori squadra/confronto */
   .sqctrl,.cfctrl{display:flex; gap:18px; flex-wrap:wrap; margin-bottom:22px;}
   .sqfield{display:flex; flex-direction:column; gap:6px;}
@@ -128,7 +132,7 @@
 <script>
 const M={
  inc:{ unit:'%', dec:1, title:"Incidenza dentro i gol da piazzato",
-  note:'Quanto pesa ogni tipologia <b>dentro</b> i gol da palla inattiva, media 5 stagioni. Angolo e rigore insieme valgono circa il 60%.',
+  note:'Quanto pesa ogni tipologia <b>dentro</b> i gol da palla inattiva, media 5 stagioni. Angolo e rigore insieme valgono circa il 60%. Qui la rimessa coincide con i cross in area: lato gol sono la stessa cosa.',
   box:'<b>Lettura:</b> l\'angolo è la prima fonte (~33%) e cresce in entrambi i campionati, ma resta sotto soglia trend — da segnalare. Il rigore è la seconda voce e in Serie B cala in modo reale (R²=0,69). «Altre» pesa quanto la punizione: una fetta dei gol da fermo nasce da sviluppi non programmabili.',
   data:{
    ang:{A:{vals:[28.1,35.3,31.7,32.6,35.8],m:32.7,b:1.26,r2:0.42}, B:{vals:[32.0,27.1,34.5,34.2,36.8],m:32.9,b:1.68,r2:0.52}},
@@ -148,14 +152,20 @@ const M={
    rig:{A:{vals:[0.2,0.2,0.2,0.1,0.1],m:0.2,b:-0.01,r2:0.78}, B:{vals:[0.2,0.2,0.2,0.1,0.1],m:0.2,b:-0.01,r2:0.45}}
   }, order:['ang','pun','lat','latcross','rig']},
  cnv:{ unit:'%', dec:1, title:"Conversione: gol ogni 100 battute",
-  note:'Quanti gol ogni 100 battute. <b>Il rigore converte ~77%: come 25 angoli.</b> Questo spiega perché il rigore pesa tanto pur essendo rarissimo. L\'angolo in Serie B sta migliorando (R²=0,70).',
-  box:'<b>Lettura:</b> la distanza tra rigore (~77%) e tutto il resto (angolo ~3%, punizione ~2,5%, rimessa &lt;1%) è enorme. Sull\'angolo non basta batterlo: serve lo schema che porti al tiro. In Serie B l\'angolo converte sempre meglio — gli schemi stanno funzionando.',
+  note:'Quanti gol ogni 100 battute. <b>Il rigore converte ~77%: come 25 angoli.</b> Sulla rimessa due letture: su <b>tutte</b> le rimesse la resa è &lt;1%, ma sulle sole <b>battute come cross</b> in area sale a ~6%. È lì che nasce il gol.',
+  box:'<b>Lettura:</b> il rigore (~77%) domina per efficienza ma vale ~4,6 gol; l\'angolo rende poco (~3%) ma ne fa di più (~5,5) perché se ne battono tanti. Sulla rimessa: <b>0,6% su tutte, ma ~6% sui soli cross in area</b>. «Altre situazioni» non ha una conversione calcolabile (non esiste un volume di battute dedicato), ma pesa ~2,7 gol a stagione: le cinque righe sopra non sono il totale dei piazzati.',
   data:{
    rig:{A:{vals:[77.5,78.7,77.9,76.2,76.4],m:77.3,b:-0.46,r2:0.49}, B:{vals:[75.4,77.1,80.2,76.9,79.4],m:77.8,b:0.79,r2:0.41}},
    ang:{A:{vals:[2.9,3.2,3.0,2.9,3.5],m:3.1,b:0.10,r2:0.37}, B:{vals:[3.1,2.9,3.8,3.7,4.0],m:3.5,b:0.25,r2:0.70}},
    pun:{A:{vals:[3.1,1.9,2.5,2.3,2.5],m:2.5,b:-0.08,r2:0.10}, B:{vals:[2.7,2.9,3.2,2.8,2.5],m:2.8,b:-0.05,r2:0.12}},
-   lat:{A:{vals:[0.6,0.4,0.7,0.6,0.5],m:0.6,b:0.00,r2:0.00}, B:{vals:[0.5,0.8,0.7,0.7,0.6],m:0.7,b:0.01,r2:0.01}}
-  }, order:['rig','ang','pun','lat']}
+   lat:{A:{vals:[0.6,0.4,0.7,0.6,0.5],m:0.6,b:0.00,r2:0.00}, B:{vals:[0.5,0.8,0.7,0.7,0.6],m:0.7,b:0.01,r2:0.01}},
+   latcross:{A:{vals:[7.8,4.9,7.8,5.8,3.2],m:5.9,b:-0.83,r2:0.44}, B:{vals:[6.5,6.8,8.1,4.6,3.4],m:5.9,b:-0.84,r2:0.51}},
+   altre:{nd:true, A:{m:0,b:0,r2:0}, B:{m:0,b:0,r2:0}}
+  }, order:['rig','ang','pun','lat','latcross','altre']}
+};
+const GOLMEDIA={
+  A:{ang:5.5,pun:2.6,lat:1.5,latcross:1.5,rig:4.6,altre:2.7},
+  B:{ang:6.4,pun:3.3,lat:2.0,latcross:2.0,rig:4.5,altre:3.1}
 };
 const META={
   ang:{l:'Angolo',c:'var(--ang)'}, rig:{l:'Rigore',c:'var(--rig)'},
@@ -197,20 +207,28 @@ function spark(vals,col,unit){
 function rowHTML(tk,camp){
   const meta=META[tk], d=M[view].data[tk][camp], vb=verd(d.r2), sub=(tk==='latcross');
   const unit=M[view].unit, dec=M[view].dec;
+  const isND=(M[view].data[tk].nd===true);
+  const gm=(GOLMEDIA[camp]&&GOLMEDIA[camp][tk]!=null)?GOLMEDIA[camp][tk]:null;
+  const gmHTML = gm!=null ? `<span class="vgol">${gm.toFixed(1).replace('.',',')} gol a stagione</span>` : '';
   let valHTML;
-  if(view==='qty'){
+  if(isND){
+    valHTML=`<span class="vstack"><span class="rval rnd">n.d.</span>${gmHTML}</span>`;
+  } else if(view==='qty'){
     const stag=Math.round(d.m*38);
     valHTML=`<span class="rval" style="color:${meta.c}">${d.m.toFixed(dec).replace('.',',')}<span class="vunit">/gara</span></span><span class="vstag">${stag}<span class="vunit">/stagione</span></span>`;
   } else {
-    valHTML=`<span class="rval" style="color:${meta.c}">${d.m.toFixed(dec)}${unit}</span>`;
+    valHTML=`<span class="vstack"><span class="rval" style="color:${meta.c}">${d.m.toFixed(dec)}${unit}</span>${gmHTML}</span>`;
   }
+  const midCell = isND
+    ? `<div class="sparkcell"><span class="ndnote">conversione non calcolabile · manca il volume di battute</span></div>`
+    : `<div class="sparkcell">${spark(d.vals,meta.c,unit)}</div>`;
+  const trendCell = isND ? '' : `<div class="rtrend"><span class="slope">${d.b>0?'+':''}${d.b.toFixed(2)}/anno</span><span class="badge" style="color:${vb[1]};background:${vb[2]}">${vb[0]}</span></div>`;
   return `<div class="row ${sub?'sub':''}">
     <span class="dot" style="background:${meta.c}"></span>
     <div class="rname-wrap"><span class="rname">${meta.l}</span>
-      <div class="rtrend"><span class="slope">${d.b>0?'+':''}${d.b.toFixed(2)}/anno</span>
-        <span class="badge" style="color:${vb[1]};background:${vb[2]}">${vb[0]}</span></div>
+      ${trendCell}
     </div>
-    <div class="sparkcell">${spark(d.vals,meta.c,unit)}</div>
+    ${midCell}
     <span class="vbox">${valHTML}</span>
   </div>`;
 }
